@@ -1,45 +1,64 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import ReactDOM from "react-dom/client";
-// import { createStore } from "./store/createStore";
-// import { taskReducer } from "./store/taskReduser";
-import * as actions from "./store/action";
-import { initiateStore } from "./store/store";
-//import { compose, pipe } from "lodash/fp";
+import {
+    titleChange,
+    taskDelete,
+    loadTasks,
+    getTasks,
+    getTaskLoadingStatus,
+    taskCreate,
+    taskComplete,
+} from "./store/task";
+import configureStore from "./store/store";
+import { Provider, useDispatch, useSelector } from "react-redux";
+import { getError } from "./store/error";
 
-// const initialState = [
-//     { id: 1, title: "Task 1", completed: false },
-//     { id: 2, title: "Task 2", completed: false },
-// ];
-const store = initiateStore();
+const store = configureStore();
 const App = () => {
-    const [state, setState] = useState(store.getState());
-    useEffect(
-        () =>
-            store.subscribe(() => {
-                setState(store.getState());
-            }),
-        []
-    );
-    const completeTask = (taskId) => {
-        store.dispatch(actions.taskComplete(taskId));
-    };
+    const task = useSelector(getTasks());
+    const isLoading = useSelector(getTaskLoadingStatus());
+    const error = useSelector(getError());
+    console.log(task);
+    const dispatch = useDispatch();
+    useEffect(() => {
+        dispatch(loadTasks());
+    }, []);
     const changeTitle = (taskId) => {
-        store.dispatch(actions.titlechange(taskId));
+        dispatch(titleChange(taskId));
     };
     const deleteTask = (taskId) => {
-        store.dispatch(actions.taskDelete(taskId));
+        dispatch(taskDelete(taskId));
     };
+    const completedTask = (taskId) => {
+        dispatch(taskComplete(taskId));
+    };
+
+    const createTask = () => {
+        dispatch(
+            taskCreate({
+                title: "Supper new task Title",
+                completed: false,
+            })
+        );
+    };
+
+    if (isLoading) {
+        return <h1>Loading</h1>;
+    }
+    if (error) {
+        return <p>{error}</p>;
+    }
 
     return (
         <>
             <h1>App</h1>
 
             <ul>
-                {state.map((el) => (
+                {task.map((el) => (
                     <li key={el.id}>
                         <p>{el.title}</p>
                         <p>{`competed: ${el.completed}`}</p>
-                        <button onClick={() => completeTask(el.id)}>
+                        <button onClick={() => completedTask(el.id)}>
                             Completed
                         </button>
                         <button onClick={() => changeTitle(el.id)}>
@@ -52,33 +71,19 @@ const App = () => {
                     </li>
                 ))}
             </ul>
+            <button onClick={createTask}>Create new Task</button>
         </>
     );
 };
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(
-    <React.StrictMode>
-        <App />
-    </React.StrictMode>
+    <Provider store={store}>
+        <React.StrictMode>
+            <App />
+        </React.StrictMode>
+    </Provider>
 );
-
-// const x = 2;
-// let y = 6;
-// const double = (number) => number * 2;
-// const square = (number) => number * number;
-// const half = (number) => number / y;
-// console.log(half(12));//не чистые функции
-// y = 2;
-// console.log(half(12));
-// // const mathCalculate = compose(half, square, double);
-
-// const divide = (num2) => {
-//     return function (num1) {
-//         return num1 / num2;
-//     };
-// };
-// const mathCalculate = pipe(double, square, half, divide(3));
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))
