@@ -11,13 +11,9 @@ const todosService = {
         });
         return data;
     },
-    post: async (newData) => {
-        const { data } = await httpService.post(todosEndepoint, {
-            data: { newData },
-        });
-        const { id } = data;
-        console.log(id);
-        return { id, ...newData };
+    post: async (payload) => {
+        const { data } = await httpService.post(todosEndepoint, payload);
+        return data;
     },
 };
 
