@@ -27,7 +27,6 @@ const taskSlice = createSlice({
         },
         create(state, action) {
             const newTask = {
-                id: state.entities.length + 1,
                 ...action.payload,
             };
             state.entities.push(newTask);
@@ -59,8 +58,8 @@ export const loadTasks = () => async (dispatch) => {
 
 export const taskCreate = (data) => async (dispatch) => {
     try {
-        await todosService.post(data);
-        return dispatch(create(data));
+        const newTaskData = await todosService.post(data);
+        dispatch(create(newTaskData));
     } catch (error) {
         dispatch(setError(error.message));
     }

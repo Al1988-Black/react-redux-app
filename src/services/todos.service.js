@@ -12,9 +12,15 @@ const todosService = {
         return data;
     },
     post: async (newData) => {
-        await httpService.post(todosEndepoint, { data: { newData } });
-        return newData;
+        const { data } = await httpService.post(todosEndepoint, {
+            data: { newData },
+        });
+        const { id } = data;
+        console.log(id);
+        return { id, ...newData };
     },
 };
 
 export default todosService;
+
+// await httpService.post(todosEndepoint, { data: { newData } })
